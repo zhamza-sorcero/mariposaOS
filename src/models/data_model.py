@@ -1,10 +1,24 @@
 import re
+import ssl
 from collections import Counter
 
+import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 from textblob import TextBlob
 
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+# Download stopwords if they're not already downloaded
+try:
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords')
 
 def load_and_process_data(filepath='matos2024.csv'):
     """

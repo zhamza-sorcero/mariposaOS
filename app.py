@@ -1,4 +1,9 @@
+import streamlit as st
+
 from src.controllers.main_controller import main
 
-if __name__ == "__main__":
-    main()
+try:
+    if __name__ == "__main__":
+        main()
+except Exception as e:
+    st.error(f"An error occurred: {str(e)}")
