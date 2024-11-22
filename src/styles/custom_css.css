@@ -1,0 +1,81 @@
+/* Combine all CSS styles */
+.main .block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    max-width: 100%;
+}
+
+.sentiment-metric {
+    background-color: #ffffff;
+    padding: min(20px, 3vw);
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-height: 120px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    margin: 0.5rem 0;
+}
+
+.metric-title {
+    color: #1DA1F2;
+    font-weight: 600;
+    font-size: clamp(0.8rem, 1.2vw, 1.2rem);
+}
+
+.metric-value {
+    color: #14171A;
+    font-weight: 600;
+    font-size: clamp(1.2rem, 1.8vw, 2rem);
+}
+
+.stDataFrame {
+    width: 100% !important;
+}
+
+.stDataFrame table {
+    width: 100%;
+    color: white !important;
+    background-color: black !important;
+    min-width: 800px;
+}
+
+.stDataFrame th {
+    background-color: #1DA1F2 !important;
+    color: white !important;
+    font-weight: bold !important;
+    text-align: left !important;
+    padding: 12px !important;
+    border: 1px solid white !important;
+}
+
+.stDataFrame td {
+    background-color: black !important;
+    color: white !important;
+    text-align: left !important;
+    padding: 12px !important;
+    border: 1px solid white !important;
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media screen and (max-width: 768px) {
+    .sentiment-metric {
+        padding: 10px;
+        min-height: 100px;
+    }
+
+    .stDataFrame table {
+        font-size: 14px;
+    }
+
+    .stDataFrame th,
+    .stDataFrame td {
+        padding: 8px !important;
+    }
+}
