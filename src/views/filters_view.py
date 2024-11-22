@@ -88,11 +88,38 @@ def apply_numeric_filter(df, column, label):
     return df[mask]
 
 
+def apply_user_filter(df):
+    # Get users sorted by total views
+    user_views = df.groupby('user name')['views'].sum().sort_values(ascending=False)
+    user_options = ['All Users'] + list(user_views.index)
+    
+    selected_user = st.selectbox(
+        "Filter by User (Ranked by Views)",
+        options=user_options,
+        format_func=lambda x: f"{x} ({int(user_views[x]):,} views)" if x != 'All Users' else x
+    )
+    
+    if selected_user != 'All Users':
+        df = df[df['user name'] == selected_user]
+    
+    return df
+
+
 def display_filters(df):
     with st.sidebar:
-        st.markdown("<h3 style='font-size: clamp(1rem, 1.5vw, 1.5rem);'>Filters</h3>", unsafe_allow_html=True)
+        st.markdown("""
+            <div style='padding: 1rem 0; border-bottom: 1px solid #e2e8f0;'>
+                <h3 style='font-size: 1.25rem; font-weight: 600; color: #1e293b;'>
+                    Dashboard Filters
+                </h3>
+                <p style='color: #64748b; font-size: 0.875rem;'>
+                    Refine your data view
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
         try:
             filtered_df = apply_date_filter(df)
+            filtered_df = apply_user_filter(filtered_df)
             filtered_df = apply_sentiment_filter(filtered_df)
             filtered_df = apply_word_filters(filtered_df)
             filtered_df = apply_numeric_filter(filtered_df, 'likes', 'Likes')

@@ -4,6 +4,8 @@ import streamlit as st
 
 from src.models.data_model import (
     categorize_sentiment,
+    get_hashtag_frequency,
+    get_location_counts,
     get_sentiment,
     get_word_frequency,
     load_and_process_data,
@@ -16,6 +18,8 @@ from src.views.dashboard_view import (
 from src.views.filters_view import display_filters
 from src.views.metrics_view import (
     create_engagement_scatter,
+    create_hashtag_chart,
+    create_location_chart,
     create_pie_chart,
     create_time_series,
     create_user_table,
@@ -72,8 +76,9 @@ def main():
 
         with tab3:
             col1, col2 = st.columns([0.6, 0.4])
-
+            
             with col1:
+                # Word frequency chart
                 all_text = ' '.join(filtered_df['content'].fillna('').astype(str))
                 word_freq = get_word_frequency(all_text).most_common(15)
                 st.plotly_chart(
@@ -81,17 +86,34 @@ def main():
                     use_container_width=True,
                     config={'displayModeBar': False}
                 )
+                
+                # Location chart
+                location_counts = get_location_counts(filtered_df)
+                st.plotly_chart(
+                    create_location_chart(location_counts),
+                    use_container_width=True,
+                    config={'displayModeBar': False}
+                )
 
             with col2:
+                # Sentiment pie chart
                 sentiment_counts = filtered_df['sentiment'].value_counts()
                 st.plotly_chart(
                     create_pie_chart(sentiment_counts),
                     use_container_width=True,
                     config={'displayModeBar': False}
                 )
+                
+                # Hashtag frequency chart
+                hashtag_freq = get_hashtag_frequency(filtered_df['content'])
+                st.plotly_chart(
+                    create_hashtag_chart(hashtag_freq),
+                    use_container_width=True,
+                    config={'displayModeBar': False}
+                )
 
             st.markdown("""
-                <h3 style='text-align: center; color: #ffffff; margin: 2rem 0; 
+                <h3 style='text-align: center; margin: 2rem 0; 
                 font-size: clamp(1.2rem, 1.8vw, 1.8rem);'>📝 Top Viewed Posts</h3>
             """, unsafe_allow_html=True)
 

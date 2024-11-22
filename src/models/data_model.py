@@ -14,10 +14,13 @@ def load_and_process_data(filepath='matos2024.csv'):
     df = pd.read_csv(filepath)
     df['date'] = pd.to_datetime(df['date'])
     numeric_columns = ['replies', 'reposts', 'likes', 'views', 'followers']
-
+    
+    for col in numeric_columns:
+        df[col] = df[col].astype(str).str.replace(',', '')
+    
     for col in numeric_columns:
         df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
-
+    
     return df
 
 def get_sentiment(text):
@@ -56,4 +59,20 @@ def get_word_frequency(text):
     
     words = [word for word in words if word not in stop_words and len(word) > 2]
     
-    return Counter(words) 
+    return Counter(words)
+
+def get_hashtag_frequency(texts):
+    """Extract and count hashtags from texts"""
+    hashtag_pattern = r'#(\w+)'
+    hashtags = []
+    
+    for text in texts:
+        if isinstance(text, str):
+            hashtags.extend(re.findall(hashtag_pattern, text.lower()))
+    
+    return Counter(hashtags)
+
+def get_location_counts(df):
+    """Count posts by location"""
+    locations = df['location'].fillna('Unknown')
+    return locations.value_counts()
