@@ -1,52 +1,22 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from textblob import TextBlob
 import re
 from collections import Counter
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-def apply_custom_css():
-    st.markdown("""
-        <style>
-        .sentiment-metric {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;  /* Changed from center to space-around */
-            align-items: center;
-            text-align: center;
-        }
-        .metric-title {
-            color: #1DA1F2;
-            font-weight: 600;
-            width: 100%;
-            text-align: center;
-            margin: 0;  /* Remove default margins */
-            font-size: 1.2rem;  /* Standardize title size */
-        }
-        .metric-value {
-            color: #14171A;
-            font-weight: 600;
-            width: 100%;
-            text-align: center;
-            margin: 0;  /* Remove default margins */
-            font-size: 2rem;  /* Standardize value size */
-        }
-        /* Rest of the CSS remains the same */
-        </style>
-    """, unsafe_allow_html=True)
 
 def load_and_process_data():
+    """
+    Loads and processes the CSV data, converting date strings to datetime
+    and handling numeric columns appropriately.
+    """
     df = pd.read_csv('matos2024.csv')
     df['date'] = pd.to_datetime(df['date'])
-
     numeric_columns = ['replies', 'reposts', 'likes', 'views', 'followers']
+
     for col in numeric_columns:
         df[col] = pd.to_numeric(df[col], errors='coerce')
         df[col] = df[col].fillna(0)
@@ -54,7 +24,94 @@ def load_and_process_data():
     return df
 
 
+def apply_custom_css():
+    """Apply custom CSS styling"""
+    st.markdown("""
+        <style>
+        /* Combine all CSS styles */
+        .main .block-container {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            max-width: 100%;
+        }
+
+        .sentiment-metric {
+            background-color: #ffffff;
+            padding: min(20px, 3vw);
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 120px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        .metric-title {
+            color: #1DA1F2;
+            font-weight: 600;
+            font-size: clamp(0.8rem, 1.2vw, 1.2rem);
+        }
+
+        .metric-value {
+            color: #14171A;
+            font-weight: 600;
+            font-size: clamp(1.2rem, 1.8vw, 2rem);
+        }
+
+        .stDataFrame {
+            width: 100% !important;
+        }
+
+        .stDataFrame table {
+            width: 100%;
+            color: white !important;
+            background-color: black !important;
+            min-width: 800px;
+        }
+
+        .stDataFrame th {
+            background-color: #1DA1F2 !important;
+            color: white !important;
+            font-weight: bold !important;
+            text-align: left !important;
+            padding: 12px !important;
+            border: 1px solid white !important;
+        }
+
+        .stDataFrame td {
+            background-color: black !important;
+            color: white !important;
+            text-align: left !important;
+            padding: 12px !important;
+            border: 1px solid white !important;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media screen and (max-width: 768px) {
+            .sentiment-metric {
+                padding: 10px;
+                min-height: 100px;
+            }
+            .stDataFrame table {
+                font-size: 14px;
+            }
+            .stDataFrame th, .stDataFrame td {
+                padding: 8px !important;
+            }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+
 def get_sentiment(text):
+    """Calculate sentiment using TextBlob"""
     try:
         return TextBlob(str(text)).sentiment.polarity
     except:
@@ -62,6 +119,7 @@ def get_sentiment(text):
 
 
 def categorize_sentiment(polarity):
+    """Categorize sentiment score"""
     if polarity > 0:
         return 'Positive'
     elif polarity < 0:
@@ -70,16 +128,21 @@ def categorize_sentiment(polarity):
 
 
 def get_word_frequency(text):
+    """Analyze word frequency excluding stopwords"""
     text = str(text).lower()
     words = re.findall(r'\b\w+\b', text)
-    stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'}
+    stopwords = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to',
+                 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'over',
+                 'after', 'is', 'are', 'was', 'were', 'this', 'that', 'these',
+                 'those', 'has', 'have', 'had', 'what', 'when', 'where', 'who',
+                 'which', 'why', 'how'}
     words = [word for word in words if word not in stopwords and len(word) > 2]
     return Counter(words)
 
 
 def create_engagement_scatter(df):
+    """Create engagement scatter plot"""
     fig = go.Figure()
-
     fig.add_trace(go.Scatter(
         x=df['views'],
         y=df['likes'],
@@ -101,72 +164,109 @@ def create_engagement_scatter(df):
 
     fig.update_layout(
         title={
-            'text': 'Engagement Analysis (bubble size = followers/1000)',
+            'text': 'Engagement Analysis',
             'font': {'color': '#14171A', 'size': 20}
         },
         xaxis_title='Views',
         yaxis_title='Likes',
         template='plotly_white',
-        height=500
+        height=500,
+        margin=dict(l=50, r=50, t=50, b=50),
+        autosize=True,
+        hovermode='closest',
+        width=None
     )
-
     return fig
 
 
 def create_user_table(df):
-    # Sort by views and select top 10 posts
+    """Create formatted table of top posts"""
     table_df = df.sort_values('views', ascending=False).head(10)
 
-    # Prepare the dataframe for display
     display_df = pd.DataFrame({
         'Username': ['@' + str(username) for username in table_df['user name']],
         'Date': table_df['date'].dt.strftime('%Y-%m-%d'),
-        'Content': [content[:100] + ('...' if len(content) > 100 else '') for content in table_df['content']],
+        'Content': [content[:100] + ('...' if len(str(content)) > 100 else '')
+                    for content in table_df['content']],
         'Followers': [f"{int(followers):,}" for followers in table_df['followers']],
         'Views': [f"{int(views):,}" for views in table_df['views']]
     })
 
-    # Apply custom CSS for the table
-    st.markdown("""
-        <style>
-        .stDataFrame {
-            background-color: black;
-        }
-        .stDataFrame table {
-            width: 100%;
-            color: white !important;
-            background-color: black !important;
-        }
-        .stDataFrame th {
-            background-color: #1DA1F2 !important;
-            color: white !important;
-            font-weight: bold !important;
-            text-align: left !important;
-            padding: 12px !important;
-            border: 1px solid white !important;
-        }
-        .stDataFrame td {
-            background-color: black !important;
-            color: white !important;
-            text-align: left !important;
-            padding: 12px !important;
-            border: 1px solid white !important;
-        }
-        .stDataFrame tr:hover td {
-            background-color: #1a1a1a !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
     return display_df
 
 
+def create_pie_chart(sentiment_counts):
+    """Create pie chart for sentiment distribution"""
+    fig = px.pie(
+        values=sentiment_counts.values,
+        names=sentiment_counts.index,
+        color=sentiment_counts.index,
+        color_discrete_map={
+            'Positive': '#2ECC71',
+            'Neutral': '#95A5A6',
+            'Negative': '#E74C3C'
+        }
+    )
+    fig.update_layout(
+        title={
+            'text': 'Sentiment Distribution',
+            'y': 0.95,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'
+        },
+        margin=dict(t=50, b=0, l=0, r=0),
+        height=300,
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5
+        )
+    )
+    return fig
+
+
+def create_word_freq_chart(word_freq):
+    """Create word frequency bar chart"""
+    fig = px.bar(
+        x=[count for _, count in word_freq],
+        y=[word for word, _ in word_freq],
+        orientation='h',
+        color=[count for _, count in word_freq],
+        color_continuous_scale='Viridis'
+    )
+    fig.update_layout(
+        title={
+            'text': 'Top Words',
+            'y': 0.95,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'
+        },
+        yaxis={'categoryorder': 'total ascending'},
+        xaxis_title='Count',
+        yaxis_title='Word',
+        margin=dict(t=50, b=0, l=100, r=0),
+        height=300,
+        showlegend=False
+    )
+    return fig
+
+
 def main():
-    st.set_page_config(page_title="MaTOS 2024 - Chatter on X", layout="wide")
+    st.set_page_config(
+        page_title="MaTOS 2024 - Chatter on X",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+
     apply_custom_css()
 
     st.markdown("""
-        <h1 class='light-text' style='text-align: center;'>
+        <h1 style='text-align: center; font-size: clamp(1.5rem, 2.5vw, 2.5rem); margin-bottom: 2rem;'>
         MaTOS 2024 - Social Media Analytics Dashboard
         </h1>
     """, unsafe_allow_html=True)
@@ -176,21 +276,17 @@ def main():
         df['sentiment_score'] = df['content'].apply(get_sentiment)
         df['sentiment'] = df['sentiment_score'].apply(categorize_sentiment)
 
-        # Date range filter
-        st.sidebar.markdown("<h3 class='light-text'>Filters</h3>", unsafe_allow_html=True)
-        date_range = st.sidebar.date_input(
-            "Select Date Range",
-            value=(df['date'].min().date(), df['date'].max().date()),
-            min_value=df['date'].min().date(),
-            max_value=df['date'].max().date()
-        )
+        with st.sidebar:
+            st.markdown("<h3 style='font-size: clamp(1rem, 1.5vw, 1.5rem);'>Filters</h3>", unsafe_allow_html=True)
+            date_range = st.date_input(
+                "Select Date Range",
+                value=(df['date'].min().date(), df['date'].max().date()),
+                min_value=df['date'].min().date(),
+                max_value=df['date'].max().date()
+            )
 
-        # Apply date filter
         mask = (df['date'].dt.date >= date_range[0]) & (df['date'].dt.date <= date_range[1])
         filtered_df = df[mask]
-
-        # Top metrics row with equal-sized tiles
-        col1, col2, col3, col4, col5 = st.columns(5)
 
         metrics = {
             'Total Posts': len(filtered_df),
@@ -200,7 +296,8 @@ def main():
             'Avg. Sentiment': round(filtered_df['sentiment_score'].mean(), 2)
         }
 
-        for col, (metric, value) in zip([col1, col2, col3, col4, col5], metrics.items()):
+        cols = st.columns([1] * len(metrics))
+        for col, (metric, value) in zip(cols, metrics.items()):
             col.markdown(f"""
                 <div class='sentiment-metric'>
                     <h4 class='metric-title'>{metric}</h4>
@@ -208,79 +305,59 @@ def main():
                 </div>
             """, unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-
-        # Interactive tabs
-        tab1, tab2, tab3 = st.tabs(["📈 Engagement Analysis", "🔄 Time Series", "📊 Content Analysis"])
+        tab1, tab2, tab3 = st.tabs(["📈 Engagement", "🔄 Time Series", "📊 Analysis"])
 
         with tab1:
-            st.plotly_chart(create_engagement_scatter(filtered_df), use_container_width=True)
+            st.plotly_chart(
+                create_engagement_scatter(filtered_df),
+                use_container_width=True,
+                config={
+                    'displayModeBar': True,
+                    'displaylogo': False,
+                    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+                    'scrollZoom': True
+                }
+            )
 
         with tab2:
-            # Removed followers from metric options
             metric = st.selectbox("Select Metric", ['views', 'likes', 'reposts'])
             daily_metric = filtered_df.groupby(filtered_df['date'].dt.date)[metric].sum().reset_index()
             fig = px.line(daily_metric, x='date', y=metric)
             fig.update_traces(line_color='#1DA1F2')
             fig.update_layout(
-                title={
-                    'text': f'Daily {metric.capitalize()} Over Time',
-                    'font': {'color': '#14171A', 'size': 20}
-                },
+                title=f'Daily {metric.capitalize()}',
                 xaxis_title='Date',
-                yaxis_title=metric.capitalize()
+                yaxis_title=metric.capitalize(),
+                margin=dict(l=50, r=50, t=50, b=50),
+                autosize=True
             )
             st.plotly_chart(fig, use_container_width=True)
 
         with tab3:
-            col1, col2 = st.columns(2)
+            col1, col2 = st.columns([0.6, 0.4])
 
             with col1:
-                # Word frequency visualization
                 all_text = ' '.join(filtered_df['content'].fillna('').astype(str))
                 word_freq = get_word_frequency(all_text).most_common(15)
-                fig = px.bar(
-                    x=[count for _, count in word_freq],
-                    y=[word for word, _ in word_freq],
-                    orientation='h',
-                    color=[count for _, count in word_freq],
-                    color_continuous_scale='Viridis'
+                st.plotly_chart(
+                    create_word_freq_chart(word_freq),
+                    use_container_width=True,
+                    config={'displayModeBar': False}
                 )
-                fig.update_layout(
-                    title={
-                        'text': 'Top Words',
-                        'font': {'color': '#14171A', 'size': 20}
-                    },
-                    yaxis={'categoryorder': 'total ascending'},
-                    xaxis_title='Count',
-                    yaxis_title='Word'
-                )
-                st.plotly_chart(fig, use_container_width=True)
 
             with col2:
-                # Sentiment distribution
                 sentiment_counts = filtered_df['sentiment'].value_counts()
-                fig = px.pie(
-                    values=sentiment_counts.values,
-                    names=sentiment_counts.index,
-                    color=sentiment_counts.index,
-                    color_discrete_map={
-                        'Positive': '#2ECC71',
-                        'Neutral': '#95A5A6',
-                        'Negative': '#E74C3C'
-                    }
+                st.plotly_chart(
+                    create_pie_chart(sentiment_counts),
+                    use_container_width=True,
+                    config={'displayModeBar': False}
                 )
-                fig.update_layout(
-                    title={
-                        'text': 'Sentiment Distribution',
-                        'font': {'color': '#14171A', 'size': 20}
-                    }
-                )
-                st.plotly_chart(fig, use_container_width=True)
 
-            # New table section for top viewed posts
-            st.markdown("<h3 style='text-align: center; color: #ffffff; margin-top: 30px;'>📝 Top Viewed Posts</h3>",
-                        unsafe_allow_html=True)
+            st.markdown("""
+                <h3 style='text-align: center; color: #ffffff; margin: 2rem 0; 
+                font-size: clamp(1.2rem, 1.8vw, 1.8rem);'>📝 Top Viewed Posts</h3>
+            """, unsafe_allow_html=True)
+
             table_df = create_user_table(filtered_df)
             st.dataframe(
                 table_df,
