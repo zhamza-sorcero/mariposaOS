@@ -52,17 +52,48 @@ def create_engagement_scatter(df):
     )
     return fig
 
-def create_time_series(df, metric):
+def create_time_series(df, metric, chart_type='line'):
+    """Create time series chart with specified metric and chart type"""
     daily_metric = df.groupby(df['date'].dt.date)[metric].sum().reset_index()
-    fig = px.line(daily_metric, x='date', y=metric)
-    fig.update_traces(line_color='#1DA1F2')
+    
+    if metric == 'engagement_rate':
+        title = 'Daily Engagement Rate (%)'
+        y_suffix = '%'
+    else:
+        title = f'Daily {metric.capitalize()}'
+        y_suffix = ''
+    
+    if chart_type == 'line':
+        fig = px.line(daily_metric, x='date', y=metric)
+        fig.update_traces(line_color='#1DA1F2')
+    else:  # bar
+        fig = px.bar(daily_metric, x='date', y=metric)
+        fig.update_traces(marker_color='#1DA1F2')
+    
     fig.update_layout(
-        title=f'Daily {metric.capitalize()}',
+        title={
+            'text': title,
+            'y': 0.95,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top'
+        },
         xaxis_title='Date',
         yaxis_title=metric.capitalize(),
         margin=dict(l=50, r=50, t=50, b=50),
-        autosize=True
+        autosize=True,
+        showlegend=False
     )
+    
+    # Add percentage formatting for engagement rate
+    if metric == 'engagement_rate':
+        fig.update_layout(
+            yaxis=dict(
+                tickformat='.2f',
+                ticksuffix=y_suffix
+            )
+        )
+    
     return fig
 
 def create_word_freq_chart(word_freq):

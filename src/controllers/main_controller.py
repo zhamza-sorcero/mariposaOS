@@ -70,9 +70,52 @@ def main():
             )
 
         with tab2:
-            metric = st.selectbox("Select Metric", ['views', 'likes', 'reposts'])
-            fig = create_time_series(filtered_df, metric)
-            st.plotly_chart(fig, use_container_width=True)
+            control_col1, control_col2, _ = st.columns([0.2, 0.2, 0.6])
+            
+            with control_col1:
+                metrics = {
+                    'Views': 'views',
+                    'Likes': 'likes',
+                    'Reposts': 'reposts',
+                    'Replies': 'replies',
+                    'Engagement Rate': 'engagement_rate'
+                }
+                
+                selected_metrics = st.multiselect(
+                    "Select Metrics to Display",
+                    options=list(metrics.keys()),
+                    default=['Views', 'Likes'],
+                    max_selections=3
+                )
+            
+            with control_col2:
+                chart_type = st.radio(
+                    "Chart Type",
+                    options=['Line', 'Bar'],
+                    horizontal=True
+                )
+            
+            # Charts section
+            if selected_metrics:
+                filtered_df['engagement_rate'] = (
+                    (filtered_df['likes'] + filtered_df['reposts'] + filtered_df['replies']) / 
+                    filtered_df['views'].where(filtered_df['views'] > 0, 1) * 100
+                )
+                
+                figs = []
+                for metric_name in selected_metrics:
+                    metric_key = metrics[metric_name]
+                    fig = create_time_series(
+                        filtered_df, 
+                        metric_key,
+                        chart_type.lower()
+                    )
+                    figs.append(fig)
+                
+                for fig in figs:
+                    st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.warning("Please select at least one metric to display")
 
         with tab3:
             col1, col2 = st.columns([0.6, 0.4])
