@@ -162,7 +162,7 @@ def create_user_table(df):
     display_df = pd.DataFrame({
         'Username': ['@' + str(username) for username in table_df['user name']],
         'Date': table_df['date'].dt.strftime('%Y-%m-%d'),
-        'Content': [content[:200] + ('...' if len(str(content)) > 200 else '')
+        'Content': [content[:500] + ('...' if len(str(content)) > 500 else '')
                     for content in table_df['content']],
         'Followers': [f"{int(followers):,}" for followers in table_df['followers']],
         'Views': [f"{int(views):,}" for views in table_df['views']]
