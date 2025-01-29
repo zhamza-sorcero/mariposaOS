@@ -13,6 +13,7 @@ from src.models.data_model import (
 from src.views.dashboard_view import (
     apply_custom_css,
     create_tabs,
+    create_audio_player,
     display_title,
 )
 from src.views.filters_view import display_filters
@@ -30,7 +31,7 @@ from src.views.metrics_view import (
 
 def main():
     st.set_page_config(
-        page_title="MaTOS 2024 - Chatter on X",
+        page_title="MARIPOSA OS",
         layout="wide",
         initial_sidebar_state="expanded"
     )
@@ -55,7 +56,7 @@ def main():
 
         display_metrics_with_icons(metrics)
 
-        tab1, tab2, tab3 = create_tabs()
+        tab1, tab2, tab3, tab4 = create_tabs()
 
         with tab1:
             st.plotly_chart(
@@ -166,6 +167,9 @@ def main():
                 hide_index=True,
                 use_container_width=True
             )
+            
+        with tab4:
+            create_audio_player()
 
     except Exception as e:
         st.error(f"Error loading data: {str(e)}")

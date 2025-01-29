@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 
 
 def apply_custom_css(css_path='src/styles/custom_css.css'):
@@ -11,7 +12,7 @@ def display_title():
         <div style='text-align: center; padding: 1rem 0;'>
             <h1 style='font-size: 2.5rem; font-weight: 800; color: #1e293b; 
                       letter-spacing: -0.025em;'>
-                MaTOS 2024
+                MARIPOSA OS
             </h1>
             <h2 style='color: #64748b; font-size: 1.1rem;'>
                 Social Media Analytics Dashboard
@@ -19,5 +20,56 @@ def display_title():
         </div>
     """, unsafe_allow_html=True)
 
+def create_audio_player():
+    """Create an audio player using Streamlit's native audio component"""
+    audio_path = "src/audio/Amivantamab & Lazertinib in EGFR-Mutated NSCLC (2).wav"
+    
+    st.markdown("""
+        <h3 style='text-align: center; margin-bottom: 20px;'>
+            Podcast: Amivantamab & Lazertinib in EGFR-Mutated NSCLC
+        </h3>
+    """, unsafe_allow_html=True)
+    
+    # Open and read the audio file
+    audio_file = open(audio_path, "rb")
+    audio_bytes = audio_file.read()
+    
+    # Display the audio player
+    st.audio(audio_bytes, format="audio/wav")
+    
+    # Close the file after reading
+    audio_file.close()
+    
+    # Add a download button
+    st.download_button(
+        label="Download Podcast",
+        data=audio_bytes,
+        file_name="Amivantamab_Lazertinib_EGFR-Mutated_NSCLC.wav",
+        mime="audio/wav"
+    )
+    
+    # Add source information
+    st.markdown("""
+        <div style='margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 5px;'>
+            <h4 style='color: #1e293b; margin-bottom: 10px;'>Source Information:</h4>
+            <p><strong>Press Release:</strong> <a href='https://www.jnj.com/media-center/press-releases/rybrevant-amivantamab-vmjw-plus-lazcluze-lazertinib-shows-statistically-significant-and-clinically-meaningful-improvement-in-overall-survival-versus-osimertinib' target='_blank'>
+            Johnson & Johnson Press Release - RYBREVANT® (amivantamab-vmjw) plus LAZCLUZE™ (lazertinib)</a></p>
+            <p><strong>Data Source:</strong> Mariposa Cocoon OS X.csv - Social media engagement data related to the study</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Add data preview
+    st.markdown("""
+        <h4 style='color: #1e293b; margin: 20px 0 10px 0;'>Data Preview (Top 10 Rows):</h4>
+    """, unsafe_allow_html=True)
+    
+    # Read and display the CSV data
+    df = pd.read_csv('Mariposa Cocoon OS X.csv')
+    st.dataframe(
+        df.head(10),
+        hide_index=True,
+        use_container_width=True
+    )
+
 def create_tabs():
-    return st.tabs(["📈 Engagement", "🔄 Time Series", "📊 Analysis"]) 
+    return st.tabs(["📈 Engagement", "🔄 Time Series", "📊 Analysis", "�️ Podcast"])

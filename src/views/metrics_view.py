@@ -199,6 +199,7 @@ def display_metrics_with_icons(metrics):
             <div class='sentiment-metric'>
                 <h4 class='metric-title'>{icons.get(metric, '')} {metric}</h4>
                 <h2 class='metric-value'>{value:,}</h2>
+                <div class='metric-subtitle'>&nbsp;</div>
             </div>
         """, unsafe_allow_html=True)
     
@@ -206,16 +207,10 @@ def display_metrics_with_icons(metrics):
     cols[-1].markdown(f"""
         <div class='sentiment-metric'>
             <h4 class='metric-title'>📊 Overall Sentiment</h4>
-            <div style='padding-top: 0.6rem;'>
-                <h2 class='metric-value' style='color: {color}; font-size: 2.75rem; margin: 0;'>
-                    {label}
-                </h2>
-                <p style='color: var(--text-secondary); margin-top: -0.8rem; font-size: 1rem;'>
-                    Score: {sentiment_score:.2f}
-                </p>
-            </div>
+            <h2 class='metric-value' style='color: {color};'>{label}</h2>
+            <div class='metric-subtitle'>Score: {sentiment_score:.2f}</div>
         </div>
-    """, unsafe_allow_html=True) 
+    """, unsafe_allow_html=True)
 
 def create_location_chart(location_counts):
     """Create bar chart for post locations"""
@@ -275,4 +270,4 @@ def create_hashtag_chart(hashtag_freq):
         height=300,
         showlegend=False
     )
-    return fig 
+    return fig
