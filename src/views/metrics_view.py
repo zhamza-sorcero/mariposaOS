@@ -193,21 +193,55 @@ def display_metrics_with_icons(metrics):
     
     cols = st.columns(len(metrics) + 1)
     
+    # Add dark mode compatible styles
+    st.markdown("""
+        <style>
+        .metric-card {
+            background-color: var(--background-color);
+            border: 1px solid rgba(128, 128, 128, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            min-height: 120px;
+        }
+        .metric-title {
+            color: var(--text-color-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0;
+            padding: 0;
+        }
+        .metric-value {
+            color: var(--text-color);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.75rem 0 0.5rem 0;
+            line-height: 1.2;
+        }
+        .metric-subtitle {
+            color: var(--text-color-secondary);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
     # Display standard metrics
     for col, (metric, value) in zip(cols[:-1], metrics.items()):
         col.markdown(f"""
-            <div class='sentiment-metric'>
-                <h4 class='metric-title'>{icons.get(metric, '')} {metric}</h4>
-                <h2 class='metric-value'>{value:,}</h2>
+            <div class='metric-card'>
+                <div class='metric-title'>{icons.get(metric, '')} {metric}</div>
+                <div class='metric-value'>{value:,}</div>
                 <div class='metric-subtitle'>&nbsp;</div>
             </div>
         """, unsafe_allow_html=True)
     
     # Display sentiment metric with improved formatting
     cols[-1].markdown(f"""
-        <div class='sentiment-metric'>
-            <h4 class='metric-title'>📊 Overall Sentiment</h4>
-            <h2 class='metric-value' style='color: {color};'>{label}</h2>
+        <div class='metric-card'>
+            <div class='metric-title'>📊 Overall Sentiment</div>
+            <div class='metric-value' style='color: {color};'>{label}</div>
             <div class='metric-subtitle'>Score: {sentiment_score:.2f}</div>
         </div>
     """, unsafe_allow_html=True)

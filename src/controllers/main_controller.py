@@ -14,6 +14,7 @@ from src.views.dashboard_view import (
     apply_custom_css,
     create_tabs,
     create_audio_player,
+    create_video_player,
     display_title,
 )
 from src.views.filters_view import display_filters
@@ -56,7 +57,7 @@ def main():
 
         display_metrics_with_icons(metrics)
 
-        tab1, tab2, tab3, tab4 = create_tabs()
+        tab1, tab2, tab3, tab4, tab5 = create_tabs()
 
         with tab1:
             st.plotly_chart(
@@ -170,6 +171,9 @@ def main():
             
         with tab4:
             create_audio_player()
+            
+        with tab5:
+            create_video_player()
 
     except Exception as e:
         st.error(f"Error loading data: {str(e)}")

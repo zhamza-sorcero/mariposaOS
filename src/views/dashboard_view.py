@@ -71,5 +71,33 @@ def create_audio_player():
         use_container_width=True
     )
 
+def create_video_player():
+    """Create a video player using Streamlit's native video component"""
+    video_path = "src/audio/Advancements in EGFR-Mutated NSCLC Treatment.mp4"
+    
+    st.markdown("""
+        <h3 style='text-align: center; margin-bottom: 20px;'>
+            Video: Advancements in EGFR-Mutated NSCLC Treatment
+        </h3>
+    """, unsafe_allow_html=True)
+    
+    # Open and read the video file
+    video_file = open(video_path, "rb")
+    video_bytes = video_file.read()
+    
+    # Display the video player
+    st.video(video_bytes)
+    
+    # Close the file after reading
+    video_file.close()
+    
+    # Add a download button
+    st.download_button(
+        label="Download Video",
+        data=video_bytes,
+        file_name="Advancements_in_EGFR-Mutated_NSCLC_Treatment.mp4",
+        mime="video/mp4"
+    )
+
 def create_tabs():
-    return st.tabs(["📈 Engagement", "🔄 Time Series", "📊 Analysis", "�️ Podcast"])
+    return st.tabs(["📈 Engagement", "🔄 Time Series", "📊 Analysis", "🎧 Podcast", "🎥 Video"])
