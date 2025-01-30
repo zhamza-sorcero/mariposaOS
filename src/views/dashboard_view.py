@@ -15,7 +15,7 @@ def display_title():
                 MARIPOSA OS
             </h1>
             <h2 style='color: #64748b; font-size: 1.1rem;'>
-                Social Media Analytics Dashboard
+                Press Release Social Sentiment
             </h2>
         </div>
     """, unsafe_allow_html=True)
