@@ -21,40 +21,74 @@ def display_title():
     """, unsafe_allow_html=True)
 
 def create_audio_player():
-    """Create an audio player using Streamlit's native audio component"""
-    audio_path = "src/audio/Amivantamab & Lazertinib in EGFR-Mutated NSCLC (2).wav"
+    """Create audio players using Streamlit's native audio component"""
     
+    # First Podcast: MARIPOSA Trial Discussion
     st.markdown("""
         <h3 style='text-align: center; margin-bottom: 20px;'>
+            Podcast: MARIPOSA Trial Results and Analysis
+        </h3>
+    """, unsafe_allow_html=True)
+    
+    audio_path_1 = "src/audio/podcast_pharmad.mp3"
+    audio_file_1 = open(audio_path_1, "rb")
+    audio_bytes_1 = audio_file_1.read()
+    
+    st.audio(audio_bytes_1, format="audio/mp3")
+    audio_file_1.close()
+    
+    st.download_button(
+        label="Download MARIPOSA Podcast",
+        data=audio_bytes_1,
+        file_name="MARIPOSA_Trial_Discussion.mp3",
+        mime="audio/mp3"
+    )
+    
+    # Add context for MARIPOSA podcast
+    st.markdown("""
+        <div style='margin: 20px 0; padding: 20px; background-color: #f8f9fa; border-radius: 5px;'>
+            <h4 style='color: #1e293b; margin-bottom: 10px;'>Key Discussion Points:</h4>
+            <ul>
+                <li>Unprecedented median Overall Survival benefit exceeding 12 months compared to osimertinib</li>
+                <li>Analysis of the combination therapy's dual targeting approach with amivantamab and lazertinib</li>
+                <li>Discussion of pharmacological profiles and therapeutic management</li>
+                <li>Examination of resistance patterns and biomarker data</li>
+            </ul>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Second Podcast: Original Amivantamab & Lazertinib
+    st.markdown("""
+        <h3 style='text-align: center; margin: 40px 0 20px 0;'>
             Podcast: Amivantamab & Lazertinib in EGFR-Mutated NSCLC
         </h3>
     """, unsafe_allow_html=True)
     
-    # Open and read the audio file
-    audio_file = open(audio_path, "rb")
-    audio_bytes = audio_file.read()
+    audio_path_2 = "src/audio/Amivantamab & Lazertinib in EGFR-Mutated NSCLC (2).wav"
+    audio_file_2 = open(audio_path_2, "rb")
+    audio_bytes_2 = audio_file_2.read()
     
-    # Display the audio player
-    st.audio(audio_bytes, format="audio/wav")
+    st.audio(audio_bytes_2, format="audio/wav")
+    audio_file_2.close()
     
-    # Close the file after reading
-    audio_file.close()
-    
-    # Add a download button
     st.download_button(
-        label="Download Podcast",
-        data=audio_bytes,
+        label="Download Amivantamab & Lazertinib Podcast",
+        data=audio_bytes_2,
         file_name="Amivantamab_Lazertinib_EGFR-Mutated_NSCLC.wav",
         mime="audio/wav"
     )
     
-    # Add source information
+    # Add combined source information
     st.markdown("""
         <div style='margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 5px;'>
             <h4 style='color: #1e293b; margin-bottom: 10px;'>Source Information:</h4>
             <p><strong>Press Release:</strong> <a href='https://www.jnj.com/media-center/press-releases/rybrevant-amivantamab-vmjw-plus-lazcluze-lazertinib-shows-statistically-significant-and-clinically-meaningful-improvement-in-overall-survival-versus-osimertinib' target='_blank'>
             Johnson & Johnson Press Release - RYBREVANT® (amivantamab-vmjw) plus LAZCLUZE™ (lazertinib)</a></p>
-            <p><strong>Data Source:</strong> Mariposa Cocoon OS X.csv - Social media engagement data related to the study</p>
+            <p><strong>Data Sources:</strong></p>
+            <ul>
+                <li>Mariposa Cocoon OS X.csv - Social media engagement data related to the study</li>
+                <li>MARIPOSA Trial Results and Clinical Analysis</li>
+            </ul>
         </div>
     """, unsafe_allow_html=True)
     
