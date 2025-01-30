@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from src.models.data_model import get_word_frequency
+from src.models.data_model import get_word_frequency, analyze_text_content
 
 
 def create_engagement_scatter(df):
@@ -97,22 +97,20 @@ def create_time_series(df, metric, chart_type='line'):
     
     return fig
 
-def create_word_freq_chart(df, include_common=False):
+def create_word_freq_chart(df, include_common=False, min_words=2, max_words=5):
     """Create word frequency bar chart for phrases"""
-    # Combine all content
+    # Combine all content for analysis
     all_text = ' '.join(df['content'].astype(str))
     
-    # Get phrase frequencies
-    phrase_freq = get_word_frequency(all_text, include_common=include_common)
+    # Get word frequencies using improved analysis
+    word_freq = get_word_frequency(all_text, include_common, min_words, max_words)
     
-    # Filter phrases that appear more than once and get top 20
-    min_freq = 2  # Minimum frequency threshold
-    filtered_phrases = [(phrase, count) for phrase, count in phrase_freq.items() if count >= min_freq]
-    top_phrases = sorted(filtered_phrases, key=lambda x: (-x[1], x[0]))[:20]
-    
-    if not top_phrases:
+    if not word_freq:
         st.info("No significant phrases found. Try including common terms or adjusting filters.")
         return None
+    
+    # Get top phrases
+    top_phrases = word_freq.most_common(20)
     
     # Create visualization
     fig = px.bar(
@@ -125,7 +123,7 @@ def create_word_freq_chart(df, include_common=False):
     
     fig.update_layout(
         title={
-            'text': 'Top Phrases',
+            'text': f'Top Phrases ({min_words}-{max_words} words)',
             'y': 0.95,
             'x': 0.5,
             'xanchor': 'center',

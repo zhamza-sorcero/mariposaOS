@@ -106,32 +106,60 @@ def create_audio_player():
     )
 
 def create_video_player():
-    """Create a video player using Streamlit's native video component"""
-    video_path = "src/audio/Advancements in EGFR-Mutated NSCLC Treatment.mp4"
+    """Create video players using Streamlit's native video component"""
     
+    # First Video: MARIPOSA Trial
+    st.markdown("""
+        <h3 style='text-align: center; margin-bottom: 20px;'>
+            Video: The MARIPOSA Trial
+        </h3>
+    """, unsafe_allow_html=True)
+    
+    video_path_1 = "src/audio/The MARIPOSA Trial_ A New Era in Lung Cancer Treatment_.mp4"
+    video_file_1 = open(video_path_1, "rb")
+    video_bytes_1 = video_file_1.read()
+    
+    # Display the first video player
+    st.video(video_bytes_1)
+    
+    # Close the file after reading
+    video_file_1.close()
+    
+    # Add a download button for first video
+    st.download_button(
+        label="Download MARIPOSA Trial Video",
+        data=video_bytes_1,
+        file_name="MARIPOSA_Trial_New_Era.mp4",
+        mime="video/mp4"
+    )
+    
+    # Add spacing between videos
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    
+    # Second Video: EGFR-Mutated NSCLC Treatment
     st.markdown("""
         <h3 style='text-align: center; margin-bottom: 20px;'>
             Video: Advancements in EGFR-Mutated NSCLC Treatment
         </h3>
     """, unsafe_allow_html=True)
     
-    # Open and read the video file
-    video_file = open(video_path, "rb")
-    video_bytes = video_file.read()
+    video_path_2 = "src/audio/Advancements in EGFR-Mutated NSCLC Treatment.mp4"
+    video_file_2 = open(video_path_2, "rb")
+    video_bytes_2 = video_file_2.read()
     
-    # Display the video player
-    st.video(video_bytes)
+    # Display the second video player
+    st.video(video_bytes_2)
     
     # Close the file after reading
-    video_file.close()
+    video_file_2.close()
     
-    # Add a download button
+    # Add a download button for second video
     st.download_button(
-        label="Download Video",
-        data=video_bytes,
+        label="Download NSCLC Treatment Video",
+        data=video_bytes_2,
         file_name="Advancements_in_EGFR-Mutated_NSCLC_Treatment.mp4",
         mime="video/mp4"
     )
 
 def create_tabs():
-    return st.tabs(["📈 Engagement", "🔄 Time Series", "📊 Analysis", "🎧 Podcast", "🎥 Video"])
+    return st.tabs(["📈 Engagement", "📊 Analysis", "🎧 Podcast", "🎥 Video", "💬 Chatbot"])

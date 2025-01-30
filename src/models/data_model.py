@@ -53,62 +53,101 @@ def categorize_sentiment(polarity):
         return 'Negative'
     return 'Neutral'
 
-def get_word_frequency(text, include_common=False):
+def analyze_text_content(text, include_common=False):
     """
-    Analyze word frequency with support for n-grams.
-    Returns a Counter object with phrase frequencies.
+    Analyze text content using standard NLP techniques to extract meaningful phrases.
+    Returns a list of tuples (phrase, count, frequency_score, num_words).
     """
+    # Convert to string and lowercase
     text = str(text).lower()
     
-    # URLs
+    # Remove URLs and clean text
     text = re.sub(r'http\S+|www\S+|https\S+', '', text)
-    
-    # Special characters and numbers, keeping only letters and spaces
     text = re.sub(r'[^a-z\s]', ' ', text)
     
-    # Split text into tokens
-    tokens = text.split()
+    # Tokenize and clean
+    tokens = [token.strip() for token in text.split() if len(token.strip()) > 2]
     
+    # Get standard stopwords
     stop_words = set(stopwords.words('english'))
-    # Add common social media terms and basic descriptive words
-    common_terms = {
-        'rt', 'via', 'amp', 'new', 'news', 'update', 'updates', 'press', 
-        'release', 'announces', 'announced', 'breaking', 'latest'
-    }
-    
     if not include_common:
-        stop_words.update(common_terms)
+        stop_words.update(['rt', 'via', 'amp'])  # Minimal social media terms
     
     # Filter tokens
-    filtered_tokens = [token for token in tokens if token not in stop_words and len(token) > 2]
+    filtered_tokens = [token for token in tokens if token not in stop_words]
     
-    # Generate n-grams (2 to 5 words)
-    phrases = []
-    for n in range(2, 6):
+    # Generate n-grams and their frequencies
+    all_phrases = []
+    total_tokens = len(filtered_tokens)
+    
+    for n in range(2, 9):
         n_grams = list(ngrams(filtered_tokens, n))
-        phrases.extend(' '.join(gram) for gram in n_grams)
+        phrase_counts = Counter(' '.join(gram) for gram in n_grams)
+        
+        for phrase, count in phrase_counts.items():
+            words = phrase.split()
+            num_words = len(words)
+            
+            # Calculate frequency score (TF - Term Frequency)
+            frequency_score = count / total_tokens if total_tokens > 0 else 0
+            
+            all_phrases.append((phrase, count, frequency_score, num_words))
     
-    # Initial frequency count
+    # Sort by count (frequency) first, then by frequency_score
+    return sorted(all_phrases, key=lambda x: (-x[1], -x[2]))
+
+def get_word_frequency(text, include_common=False, min_words=2, max_words=5):
+    """
+    Get word frequencies filtered by word count and minimum frequency threshold.
+    Returns a Counter object with significant phrases.
+    """
+    # Ensure text is a string and clean it
+    text = str(text).lower()
+    
+    # Remove URLs
+    text = re.sub(r'http\S+|www\S+|https\S+', '', text)
+    
+    # Remove special characters but keep apostrophes for contractions
+    text = re.sub(r'[^\w\s\']', ' ', text)
+    
+    # Remove numbers and extra whitespace
+    text = re.sub(r'\d+', '', text)
+    text = ' '.join(text.split())
+    
+    if not text.strip():
+        return Counter()
+    
+    # Get stopwords
+    stop_words = set(stopwords.words('english'))
+    if not include_common:
+        stop_words.update(['rt', 'via', 'amp', 'new', 'update'])
+    
+    # Tokenize and clean
+    tokens = []
+    for token in text.split():
+        token = token.strip("'")  # Remove leading/trailing apostrophes
+        if (len(token) > 2 and 
+            token not in stop_words and 
+            not token.startswith(("'", "#", "@"))):
+            tokens.append(token)
+    
+    # Generate n-grams within word range
+    phrases = []
+    for n in range(min_words, max_words + 1):
+        if n <= len(tokens):
+            n_grams = ngrams(tokens, n)
+            phrases.extend(' '.join(gram) for gram in n_grams)
+    
+    # Count frequencies and filter
     phrase_counts = Counter(phrases)
+    min_freq = 2
     
-    # Score phrases
-    phrase_scores = {}
-    for phrase in phrase_counts:
-        words = phrase.split()
-        # Base score from length
-        score = len(words) * 2
-        # Boost score for relevant medical terms
-        if any(term in phrase for term in ['egfr', 'nsclc', 'cancer', 'study', 'trial', 'survival']):
-            score += 3
-        phrase_scores[phrase] = score
-    
-    # Create sorted counter based on scores but keeping original frequencies
-    sorted_phrases = sorted(phrase_scores.items(), key=lambda x: (-x[1], x[0]))
-    result = Counter()
-    for phrase, _ in sorted_phrases:
-        result[phrase] = phrase_counts[phrase]
-    
-    return result
+    # Sort by frequency and return top phrases
+    return Counter(dict(sorted(
+        {phrase: count for phrase, count in phrase_counts.items() 
+         if count >= min_freq}.items(),
+        key=lambda x: (-x[1], x[0])
+    )))
 
 def get_hashtag_frequency(texts):
     """Extract and count hashtags from texts"""
