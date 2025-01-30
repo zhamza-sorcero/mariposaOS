@@ -5,6 +5,7 @@ from collections import Counter
 import nltk
 import pandas as pd
 from nltk.corpus import stopwords
+from nltk.util import ngrams
 from textblob import TextBlob
 
 try:
@@ -52,10 +53,10 @@ def categorize_sentiment(polarity):
         return 'Negative'
     return 'Neutral'
 
-def get_word_frequency(text):
+def get_word_frequency(text, include_common=False):
     """
-    Analyze word frequency with improved text cleaning and NLTK stopwords.
-    Returns a Counter object with word frequencies.
+    Analyze word frequency with support for n-grams.
+    Returns a Counter object with phrase frequencies.
     """
     text = str(text).lower()
     
@@ -65,15 +66,49 @@ def get_word_frequency(text):
     # Special characters and numbers, keeping only letters and spaces
     text = re.sub(r'[^a-z\s]', ' ', text)
     
-    words = text.split()
+    # Split text into tokens
+    tokens = text.split()
     
     stop_words = set(stopwords.words('english'))
-    # Add some common social media terms
-    stop_words.update(['rt', 'via', 'amp'])
+    # Add common social media terms and basic descriptive words
+    common_terms = {
+        'rt', 'via', 'amp', 'new', 'news', 'update', 'updates', 'press', 
+        'release', 'announces', 'announced', 'breaking', 'latest'
+    }
     
-    words = [word for word in words if word not in stop_words and len(word) > 2]
+    if not include_common:
+        stop_words.update(common_terms)
     
-    return Counter(words)
+    # Filter tokens
+    filtered_tokens = [token for token in tokens if token not in stop_words and len(token) > 2]
+    
+    # Generate n-grams (2 to 5 words)
+    phrases = []
+    for n in range(2, 6):
+        n_grams = list(ngrams(filtered_tokens, n))
+        phrases.extend(' '.join(gram) for gram in n_grams)
+    
+    # Initial frequency count
+    phrase_counts = Counter(phrases)
+    
+    # Score phrases
+    phrase_scores = {}
+    for phrase in phrase_counts:
+        words = phrase.split()
+        # Base score from length
+        score = len(words) * 2
+        # Boost score for relevant medical terms
+        if any(term in phrase for term in ['egfr', 'nsclc', 'cancer', 'study', 'trial', 'survival']):
+            score += 3
+        phrase_scores[phrase] = score
+    
+    # Create sorted counter based on scores but keeping original frequencies
+    sorted_phrases = sorted(phrase_scores.items(), key=lambda x: (-x[1], x[0]))
+    result = Counter()
+    for phrase, _ in sorted_phrases:
+        result[phrase] = phrase_counts[phrase]
+    
+    return result
 
 def get_hashtag_frequency(texts):
     """Extract and count hashtags from texts"""

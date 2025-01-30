@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
+from src.models.data_model import get_word_frequency
 
 
 def create_engagement_scatter(df):
@@ -96,18 +97,35 @@ def create_time_series(df, metric, chart_type='line'):
     
     return fig
 
-def create_word_freq_chart(word_freq):
-    """Create word frequency bar chart"""
+def create_word_freq_chart(df, include_common=False):
+    """Create word frequency bar chart for phrases"""
+    # Combine all content
+    all_text = ' '.join(df['content'].astype(str))
+    
+    # Get phrase frequencies
+    phrase_freq = get_word_frequency(all_text, include_common=include_common)
+    
+    # Filter phrases that appear more than once and get top 20
+    min_freq = 2  # Minimum frequency threshold
+    filtered_phrases = [(phrase, count) for phrase, count in phrase_freq.items() if count >= min_freq]
+    top_phrases = sorted(filtered_phrases, key=lambda x: (-x[1], x[0]))[:20]
+    
+    if not top_phrases:
+        st.info("No significant phrases found. Try including common terms or adjusting filters.")
+        return None
+    
+    # Create visualization
     fig = px.bar(
-        x=[count for _, count in word_freq],
-        y=[word for word, _ in word_freq],
+        x=[count for _, count in top_phrases],
+        y=[phrase for phrase, _ in top_phrases],
         orientation='h',
-        color=[count for _, count in word_freq],
+        color=[count for _, count in top_phrases],
         color_continuous_scale='Viridis'
     )
+    
     fig.update_layout(
         title={
-            'text': 'Top Words',
+            'text': 'Top Phrases',
             'y': 0.95,
             'x': 0.5,
             'xanchor': 'center',
@@ -115,11 +133,12 @@ def create_word_freq_chart(word_freq):
         },
         yaxis={'categoryorder': 'total ascending'},
         xaxis_title='Count',
-        yaxis_title='Word',
-        margin=dict(t=50, b=0, l=100, r=0),
-        height=300,
+        yaxis_title='Phrase',
+        margin=dict(t=50, b=0, l=200, r=0),  # Increased left margin for longer phrases
+        height=600,  # Further increased height for more phrases
         showlegend=False
     )
+    
     return fig
 
 def create_pie_chart(sentiment_counts):

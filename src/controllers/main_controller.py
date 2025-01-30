@@ -123,14 +123,21 @@ def main():
             col1, col2 = st.columns([0.6, 0.4])
             
             with col1:
-                # Word frequency chart
-                all_text = ' '.join(filtered_df['content'].fillna('').astype(str))
-                word_freq = get_word_frequency(all_text).most_common(15)
-                st.plotly_chart(
-                    create_word_freq_chart(word_freq),
-                    use_container_width=True,
-                    config={'displayModeBar': False}
+                # Word frequency chart with toggle for common terms
+                include_common = st.checkbox(
+                    "Include common terms",
+                    value=False,
+                    help="Toggle to include/exclude common descriptive terms in the analysis",
+                    key="word_freq_toggle"
                 )
+                
+                word_freq_chart = create_word_freq_chart(filtered_df, include_common)
+                if word_freq_chart is not None:
+                    st.plotly_chart(
+                        word_freq_chart,
+                        use_container_width=True,
+                        config={'displayModeBar': False}
+                    )
                 
                 # Location chart
                 location_counts = get_location_counts(filtered_df)
