@@ -174,7 +174,7 @@ def create_pie_chart(sentiment_counts):
 
 def create_user_table(df):
     """Create formatted table of top posts"""
-    table_df = df.sort_values('views', ascending=False).head(10)
+    table_df = df.sort_values('views', ascending=False).head(100)
 
     display_df = pd.DataFrame({
         'Username': ['@' + str(username) for username in table_df['user name']],
